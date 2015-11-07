@@ -3,6 +3,7 @@ import operator
 import hackercodecs
 import singlebytexor as sbx
 import repeatingxor as rx
+from time import *
 
 def hamming_d(x, y):
     x = x.encode('bin')
@@ -14,6 +15,10 @@ def hamming_d(x, y):
     return dist
 
 def break_xor(cip):
+    '''Breaks repeating XOR.
+       @arg cip The cipher text, in raw bytes (i.e. not encoded in any form).
+       @return None. Displays the probable key guesses.
+    '''
     e_distances = []
     for KEYSIZE in range(2, 41):
         # 3. For each KEYSIZE, take the first KEYSIZE worth of bytes, and the second
@@ -28,11 +33,14 @@ def break_xor(cip):
         norm_e_dist = avg_edit_dist / float(KEYSIZE)
         e_distances.append((KEYSIZE, norm_e_dist))
     # 4. The KEYSIZE with the smallest normalized edit distance is probably the key.
-    #    You could proceed perhaps with the smallest 2-3 KEYSIZE values.
+    #    You could proceed perhaps with the smallest 2-3 KEYSIZE values. You could
+    #    also take the average of the edit distances of the first few blocks.
     sorted_dist = sorted(e_distances, key=operator.itemgetter(1))
     #**DEBUG**
-    #for i in sorted_dist:
-    #    print i
+    debug = open("/tmp/break_xor_debug-" + strftime("%d-%b-%Y-%H-%M-%S", gmtime()), "w")
+    for i in sorted_dist:
+        debug.write(str(i) + "\n")
+    debug.close()
 
     for KEYSIZE, norm_edit_dist in sorted_dist[:1]:
         # 5. Now that you probably know the KEYSIZE: break the ciphertext into blocks

@@ -1,13 +1,46 @@
-import operator
-import fixedxor
-import re
+from Crypto.Cipher import *
+import hackercodecs
+import binascii
 import string
+import math
 
-def try_dec(s, b): # try to decrypt 's' with single-byte 'b'
-    data = fixedxor.fixed_xor(s, ("%02x" % b) * len(s))
-    return data.decode('hex')
+# Mathematics
+def extended_gcd(aa, bb):
+    lastremainder, remainder = abs(aa), abs(bb)
+    x, lastx, y, lasty = 0, 1, 1, 0
+    while remainder:
+        lastremainder, (quotient, remainder) = remainder, divmod(lastremainder, remainder)
+        x, lastx = lastx - quotient*x, x
+        y, lasty = lasty - quotient*y, y
+    return lastremainder, lastx * (-1 if aa < 0 else 1), lasty * (-1 if bb < 0 else 1)
 
-def strip_string(s):
+def modinv(a, m):
+    '''Computes the modular inverse.
+       @arg a the number to compute the inverse of.
+       @arg m the modulus.
+    '''
+    g, x, y = extended_gcd(a, m)
+    if g != 1:
+        raise ValueError
+    return x % m
+
+# Encodings
+def hextobase64(s):
+    tmp = s.decode('hex')
+    ret = tmp.encode('base64')
+    return ret
+
+def base64tohex(s):
+    tmp = s.decode('base64')
+    ret = tmp.encode('hex')
+    return ret
+
+# String Operations
+def xor(s1, s2):
+    return ''.join([chr(ord(a) ^ ord(b)) for a, b in zip(s1, s2)])
+
+# English-esque Scoring
+def alpha(s):
     return ''.join(re.findall('[a-zA-Z]+', s))
 
 def get_letter_freq_order(s):
@@ -48,23 +81,3 @@ def freq_score(s):
         neg_score += abs(cipher_freq[key] - val)
 
     return neg_score
-
-def decrypt(s):
-    '''Takes a string of hex-encoded data and attempts to decrypt it.
-       The key must be a single byte. Returns the best match (key, decrypted, score).'''
-    decrypted = []
-    for i in range(0, 256):             # test every possible singular byte as key;
-        tmp_dec = try_dec(s, i)  # return the one with the highest frequency
-        score = freq_score(tmp_dec)     # score (matches the english alphabet the closest)
-        decrypted.append((i, tmp_dec, score))  # (key, decrypted text, score)
-
-    # sort the list
-    sorted_dec = sorted(decrypted, key=operator.itemgetter(2))
-    #for v in sorted_dec[:20]:
-    #    print v
-
-    return sorted_dec[0]
-
-if __name__ == '__main__':
-    s = '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
-    print decrypt(s)
