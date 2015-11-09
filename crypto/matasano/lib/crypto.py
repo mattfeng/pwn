@@ -81,3 +81,15 @@ def freq_score(s):
         neg_score += abs(cipher_freq[key] - val)
 
     return neg_score
+
+# PKCS#7 Padding
+def pkcs_pad(message, blocksize):
+    padded = message
+    if len(message) % blocksize == 0:
+        return padded
+    pad_amt = blocksize - (len(message) % blocksize)
+    pad_val = chr(pad_amt)
+    padded += pad_val * pad_amt
+    return padded
+
+
