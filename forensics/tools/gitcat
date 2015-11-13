@@ -1,0 +1,40 @@
+#!/usr/bin/python
+
+import glob
+import os
+import sys
+
+force = False
+
+if len(sys.argv) == 2:
+    if sys.argv[1] == "force":
+        force = True
+
+print "[i] Scanning %s\n" % os.getcwd()
+
+if glob.glob(".git") != [] or force:
+    if force:
+        objects = glob.glob("[0-9a-f][0-9a-f]/*")
+        if objects == []:
+            print "[!!] No objects found... Aborting!"
+            quit()
+        else:
+            for obj in objects:
+                hashval = obj.replace("/", "")
+                print "*+*+*+* OBJECT %s *+*+*+*" % hashval
+                os.system("git cat-file -p %s" % hashval)
+                print "\n\n\n"
+        quit()
+
+    objects = glob.glob(".git/objects/[0-9a-f][0-9a-f]/*")
+    if objects == []:
+        print "[!!] No objects found... Aborting!"
+        quit()
+    else:
+        for obj in objects:
+            hashval = obj[13:].replace("/", "")
+            print "*+*+*+* OBJECT %s *+*+*+*" % hashval
+            os.system("git cat-file -p %s" % hashval)
+            print "\n\n\n"
+else:
+    print "[!!] Not a git repo, aborting!"
