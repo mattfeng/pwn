@@ -92,4 +92,13 @@ def pkcs_pad(message, blocksize):
     padded += pad_val * pad_amt
     return padded
 
+# ECB Mode
+def ecb_enc(mes, key):
+    pass
 
+# CBC Mode
+def cbc_enc(mes, key, iv):
+    pass
+
+def cbc_dec(mes, key, iv):
+    pass
